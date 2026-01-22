@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEED ZARD KITCHEN | ร้านอาหารของคนเฟี้ยว</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&family=Kanit:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --orange: #FF7E00;
+            --orange-dark: #E66A00;
+            --orange-bg: #FFF4E6;
+            --dark: #2D3436;
+            --gray: #636E72;
+            --white: #FFFFFF;
+            --radius: 20px;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: 'Sarabun', sans-serif; background: #FDFDFD; margin: 0; color: var(--dark);
+            text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header & Nav */
+        header { background: var(--white); padding: 30px 20px; text-align: center; border-bottom: 2px solid var(--orange-bg); }
+        .brand { font-family: 'Kanit', sans-serif; color: var(--orange); font-size: 2.8rem; margin: 0; }
+        .brand span { color: var(--dark); }
+
+        nav { 
+            background: rgba(255,255,255,0.95); padding: 15px; position: sticky; top: 0; z-index: 100;
+            display: flex; justify-content: center; gap: 10px; backdrop-filter: blur(10px);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05); overflow-x: auto;
+        }
+
+        .btn-filter { 
+            padding: 10px 20px; border: none; border-radius: 50px; cursor: pointer; 
+            background: #F0F0F0; color: var(--gray); font-weight: 500; transition: 0.2s; white-space: nowrap;
+        }
+        .btn-filter.active { background: var(--orange); color: white; transform: scale(1.05); }
+
+        /* Container & Grid */
+        .container { display: flex; max-width: 1200px; margin: 20px auto; padding: 0 15px; gap: 25px; }
+        .menu-area { flex: 2.5; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+
+        /* Card System */
+        .card { 
+            position: relative; background: var(--white); border-radius: var(--radius); overflow: hidden; 
+            box-shadow: 0 8px 15px rgba(0,0,0,0.05); border: 1px solid #f0f0f0;
+            transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1);
+        }
+        .card:hover { transform: translateY(-5px); }
+        
+        /* Best Seller Tag */
+        .best-tag {
+            position: absolute; top: 12px; left: 12px; background: linear-gradient(45deg, #FF7E00, #FFD93D);
+            color: white; padding: 4px 12px; border-radius: 30px; font-size: 0.75rem; font-weight: bold; z-index: 5;
+            box-shadow: 0 4px 10px rgba(255,126,0,0.3);
+        }
+
+        .img-box { width: 100%; height: 180px; background: #eee; }
+        .card img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.4s; opacity: 0; }
+        .card img.loaded { opacity: 1; }
+
+        .card-body { padding: 18px; }
+        .card-body h3 { margin: 0 0 5px; font-family: 'Kanit'; font-size: 1.1rem; }
+        .desc { font-size: 0.85rem; color: var(--gray); margin-bottom: 12px; line-height: 1.4; height: 2.8em; overflow: hidden; }
+        .price { color: var(--orange); font-size: 1.3rem; font-weight: 700; margin-bottom: 10px; }
+
+        select, input { width: 100%; padding: 10px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 8px; font-family: inherit; font-size: 0.9rem; }
+        .btn-add { width: 100%; padding: 12px; background: var(--orange); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.2s; }
+        .btn-add:active { transform: scale(0.95); }
+
+        /* Cart Sidebar */
+        .cart-side { flex: 1; background: var(--white); border-radius: var(--radius); padding: 25px; height: fit-content; position: sticky; top: 100px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .cart-title-box { display: flex; align-items: center; justify-content: space-between; position: relative; }
+        
+        /* Badge counts */
+        .cart-badge {
+            background: #FF4757; color: white; border-radius: 50%; padding: 2px 8px; font-size: 0.8rem;
+            animation: popBadge 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popBadge { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
+        .cart-item {
+            animation: slideIn 0.3s ease-out;
+            display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f5f5f5;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+        .total-box { margin-top: 15px; padding: 15px; background: var(--orange-bg); border-radius: 15px; }
+
+        /* Modals */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; backdrop-filter: blur(5px); justify-content: center; align-items: center; }
+        .modal { background: white; padding: 30px; border-radius: 30px; text-align: center; max-width: 380px; width: 90%; }
+
+        @media (max-width: 900px) { .container { flex-direction: column; } .cart-side { position: static; } }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">ZEED ZARD <span>KITCHEN</span> 🍴</div>
+    <p style="color:var(--gray)">ครัวตัวตึง เรื่องรสชาติเรายืนหนึ่งเรื่องความซี้ด</p>
+</header>
+
+<nav id="nav-bar"></nav>
+
+<div class="container">
+    <div class="menu-area">
+        <div class="menu-grid" id="menu-grid"></div>
+    </div>
+    <div class="cart-side">
+        <div class="cart-title-box">
+            <h2 style="margin:0">🛒 ตะกร้า</h2>
+            <div id="badge-container"></div>
+        </div>
+        <div id="cart-list"></div>
+        <div class="total-box">
+            <div style="display:flex; justify-content:space-between; font-size:1.4rem; font-weight:700;">
+                <span>ยอดรวม:</span>
+                <span style="color:var(--orange)">฿<span id="total-val">0</span></span>
+            </div>
+            <button class="btn-add" style="margin-top:15px; background:var(--dark);" onclick="showPayment()">💰 จ่ายเงินเลยวัยรุ่น</button>
+        </div>
+    </div>
+</div>
+
+<div id="pop-success" class="modal-overlay">
+    <div class="modal">
+        <div style="font-size:50px;">🧡</div>
+        <h2 style="margin:10px 0;">เพิ่มลงตะกร้าแล้ว!</h2>
+        <p id="pop-item-name" style="color:var(--gray); font-weight:bold;"></p>
+        <button class="btn-add" onclick="closeSuccess()">สั่งต่อเลยเฟี้ยวๆ</button>
+    </div>
+</div>
+
+<div id="pop-pay" class="modal-overlay">
+    <div class="modal">
+        <h2>สแกนจ่ายได้เลยจ้า ✨</h2>
+        <p style="font-size:1.5rem; color:var(--orange); font-weight:bold;">ยอดโอน: ฿<span id="qr-total">0</span></p>
+        <img src="images/qr-payment.png" class="qr-img" style="width:220px; height:220px; border-radius:15px; border: 5px solid #f9f9f9;" alt="QR Code" onerror="this.src='https://via.placeholder.com/220?text=PromptPay+QR'">
+        <button class="btn-add" onclick="completeOrder()">✅ โอนแล้วเรียบร้อย</button>
+        <button onclick="document.getElementById('pop-pay').style.display='none'" style="border:none; background:none; color:gray; cursor:pointer; margin-top:15px;">ยังไม่จ่าย กลับก่อน</button>
+    </div>
+</div>
+
+<script>
+    const menuData = [
+        // จานหลัก (1-10)
+        { id: 1, cat: 'main', name: 'กะเพราเนื้อสับไข่เป็ดดาว 🍳', price: 89, desc: 'เนื้อสับเน้นๆ คั่วจนแห้ง เผ็ดจนลืมทางกลับบ้าน!', img: 'images/main1.jpg', best: true },
+        { id: 2, cat: 'main', name: 'ข้าวผัดต้มยำทะเลเดือด 🌋', price: 125, desc: 'เครื่องต้มยำจัดเต็ม เหมือนยกทะเลมาไว้ที่โต๊ะ!', img: 'images/main2.jpg', best: true },
+        { id: 3, cat: 'main', name: 'ข้าวหมูกรอบคั่วพริกเกลือ 🥓', price: 99, desc: 'หมูกรอบสู้ฟัน เคี้ยวทีดังไปสามบ้านแปดบ้าน!', img: 'images/main3.jpg', best: true },
+        { id: 4, cat: 'main', name: 'ข้าวไข่ข้นมันกุ้งเน้นๆ 🦐', price: 85, desc: 'ไข่นุ่มละมุน ลื่นปรื๊ดไปพร้อมกับมันกุ้งเยิ้มๆ', img: 'images/main4.jpg', best: true },
+        { id: 5, cat: 'main', name: 'ข้าวหน้าเนื้อย่างซี้ดซ้าด 🥩', price: 180, desc: 'เนื้อย่างพรีเมียม จิ้มแจ่วสูตรแม่ให้มา!', img: 'images/main5.jpg', best: true },
+        { id: 6, cat: 'main', name: 'ข้าวหน้าแกงกะหรี่ไก่ทอด 🍛', price: 95, desc: 'ซอสแกงกะหรี่เข้มข้น ไก่ทอดกรอบๆ ฟินสุด!', img: 'images/main6.jpg' },
+        { id: 7, cat: 'main', name: 'ผัดไทยกุ้งแม่น้ำ 🍤', price: 159, desc: 'เส้นจันท์เหนียวนุ่ม ผัดซอสสูตรเด็ดร้านเรา', img: 'images/main7.jpg' },
+        { id: 8, cat: 'main', name: 'ราเมงต้มยำหมูชาชู 🍜', price: 145, desc: 'น้ำซุปต้มยำนัวๆ หมูชาชูชิ้นโต นุ่มละลาย', img: 'images/main8.jpg' },
+        { id: 9, cat: 'main', name: 'ข้าวขาหมูคูเมือง 🍖', price: 65, desc: 'ขาหมูเปื่อยๆ หนังนุ่ม คอลลาเจนเน้นๆ จ้า', img: 'images/main9.jpg' },
+        { id: 10, cat: 'main', name: 'ข้าวคลุกกะปิเครื่องแน่น 🍱', price: 75, desc: 'เครื่องเคียงจัดเต็ม หอมกะปิแท้จากระยอง', img: 'images/main10.jpg' },
+        // เครื่องดื่ม (11-20)
+        { id: 11, cat: 'drink', name: 'ชาไทยพรีเมียมเย็น 🥤', price: 55, desc: 'เข้มข้นถึงใจ หวานกำลังดี สั่งเหอะอยากชง!', img: 'images/drink1.jpg' },
+        { id: 12, cat: 'drink', name: 'มัทฉะน้ำมะพร้าวสด 🥥', price: 85, desc: 'ความลงตัวที่คาดไม่ถึง สดชื่นเหมือนอยู่ริมหาด', img: 'images/drink2.jpg' },
+        { id: 13, cat: 'drink', name: 'กาแฟยูซุโซดา 🍊', price: 80, desc: 'ตื่นเต็มตา เปรี้ยวซ่าท้าลมแดดเมืองไทย', img: 'images/drink3.jpg' },
+        { id: 14, cat: 'drink', name: 'โกโก้ปั่นวิปครีม 🍫', price: 75, desc: 'โกโก้เข้มข้น วิปครีมพูนๆ ถูกใจสายหวาน', img: 'images/drink4.jpg' },
+        { id: 15, cat: 'drink', name: 'น้ำแตงโมซี้ดซ้าด 🍉', price: 45, desc: 'แตงโมสดๆ ปั่นละเอียด เย็นจี๊ดขึ้นสมอง', img: 'images/drink5.jpg' },
+        { id: 16, cat: 'drink', name: 'ชานมไข่มุกพ่นไฟ 🧋', price: 65, desc: 'ไข่มุกหนึบหนับ พ่นไฟหอมน้ำตาลไหม้', img: 'images/drink6.jpg' },
+        { id: 17, cat: 'drink', name: 'อเมริกาโน่น้ำส้ม ☕', price: 65, desc: 'กาแฟเข้มตัดกับส้มหวานสดชื่น ลงตัวสุดๆ', img: 'images/drink7.jpg' },
+        { id: 18, cat: 'drink', name: 'อิตาเลียนโซดาบลู 🌊', price: 45, desc: 'สีฟ้าสดใส ซ่าถึงใจ ดับร้อนได้ดีเยี่ยม', img: 'images/drink8.jpg' },
+        { id: 19, cat: 'drink', name: 'น้ำส้มคั้นแท้ 100% 🍊', price: 50, desc: 'คั้นสดใหม่ทุกวัน วิตามินซีเน้นๆ จ้า', img: 'images/drink9.jpg' },
+        { id: 20, cat: 'drink', name: 'น้ำแร่เย็นฉ่ำ 💧', price: 15, desc: 'น้ำแร่จากยอดเขาสูง (มั้งนะ) เย็นสดชื่น!', img: 'images/drink10.jpg' },
+        // ของทานเล่น (21-30)
+        { id: 21, cat: 'snack', name: 'เฟรนช์ฟรายส์คลุกผงซี้ด 🍟', price: 79, desc: 'คลุกผงสูตรลับ กินแล้วหยุดไม่ได้ ใครแย่งมีเคือง!', img: 'images/snack1.jpg' },
+        { id: 22, cat: 'snack', name: 'ปีกไก่ทอดซอสซี้ด 🍗', price: 120, desc: 'กรอบนอกนุ่มใน เคลือบซอสฉ่ำๆ สูตรพิเศษ', img: 'images/snack2.jpg' },
+        { id: 23, cat: 'snack', name: 'ชีสบอลยืดสะใจ 🧀', price: 95, desc: 'กัดแล้วยืดไปถึงปากซอย อร่อยนัวๆ', img: 'images/snack3.jpg' },
+        { id: 24, cat: 'snack', name: 'เกี๊ยวซ่าทอดกรอบ 🥟', price: 65, desc: 'ไส้หมูแน่นๆ จิ้มซอสโชยุเปรี้ยวหวาน', img: 'images/snack4.jpg' },
+        { id: 25, cat: 'snack', name: 'ทอดมันกุ้งโดนัท 🍤', price: 135, desc: 'เนื้อกุ้งเด้งๆ กรอบนอกนุ่มใน ฟินเฟ่อร์', img: 'images/snack5.jpg' },
+        { id: 26, cat: 'snack', name: 'ยำวุ้นเส้นทะเล 🥗', price: 120, desc: 'แซ่บซี้ดโดนใจ เครื่องทะเลสดใหม่ทุกวัน', img: 'images/snack6.jpg' },
+        { id: 27, cat: 'snack', name: 'ขนมปังกระเทียม 🥖', price: 55, desc: 'หอมเนยกระเทียม กรอบนอกนุ่มในสุดๆ', img: 'images/snack7.jpg' },
+        { id: 28, cat: 'snack', name: 'ลูกชิ้นปลาระเบิด 💣', price: 45, desc: 'ทอดใหม่ร้อนๆ กรอบพอง จิ้มน้ำจิ้มมะขาม', img: 'images/snack8.jpg' },
+        { id: 29, cat: 'snack', name: 'นักเก็ตไก่กรอบ 🐥', price: 79, desc: 'เมนูเด็กอ้วน กินคู่กับซอสมะเขือเทศฟินๆ', img: 'images/snack9.jpg' },
+        { id: 30, cat: 'snack', name: 'หอมทอดกรุบกริบ 🧅', price: 65, desc: 'หอมใหญ่ชุบแป้งทอด กรอบฟินจนหยุดไม่อยู่', img: 'images/snack10.jpg' }
+    ];
+
+    let cart = [];
+
+    function initNav() {
+        const cats = [{id:'all', t:'🏠 ทั้งหมด'}, {id:'main', t:'🍛 จานหลัก'}, {id:'drink', t:'🥤 น้ำซี้ด'}, {id:'snack', t:'🍟 ทานเล่น'}];
+        document.getElementById('nav-bar').innerHTML = cats.map(c => `<button class="btn-filter ${c.id==='all'?'active':''}" onclick="renderMenu('${c.id}', this)">${c.t}</button>`).join('');
+    }
+
+    function renderMenu(cat, btn) {
+        if(btn) {
+            document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+        const grid = document.getElementById('menu-grid');
+        grid.innerHTML = '';
+        const filtered = cat === 'all' ? menuData : menuData.filter(i => i.cat === cat);
+        
+        filtered.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                ${item.best ? '<div class="best-tag">แนะนำ 🔥</div>' : ''}
+                <div class="img-box"><img src="${item.img}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.src='https://via.placeholder.com/300x180?text=ZEED+KITCHEN'"></div>
+                <div class="card-body">
+                    <h3>${item.name}</h3>
+                    <p class="desc">${item.desc}</p>
+                    <div class="price">฿${item.price}</div>
+                    ${item.cat==='main' ? `<select id="sz-${item.id}"><option value="0">ธรรมดา</option><option value="20">พิเศษ (+20฿)</option></select>` : ''}
+                    <input type="text" id="nt-${item.id}" placeholder="โน้ตเพิ่มเติม (เช่น ไม่เผ็ด)">
+                    <button class="btn-add" onclick="addToCart(${item.id})">🛒 ลงตะกร้าเลย!</button>
+                </div>`;
+            grid.appendChild(div);
+        });
+    }
+
+    function addToCart(id) {
+        const item = menuData.find(i => i.id === id);
+        const note = document.getElementById(`nt-${id}`).value;
+        let p = item.price, n = item.name;
+        if(item.cat === 'main') {
+            const ex = parseInt(document.getElementById(`sz-${id}`).value);
+            if(ex > 0) { p += ex; n += " (พิเศษ)"; }
+        }
+        cart.push({ n, p, nt: note });
+        updateCart();
+
+        document.getElementById('pop-item-name').innerText = n;
+        document.getElementById('pop-success').style.display = 'flex';
+    }
+
+    function updateCart() {
+        const list = document.getElementById('cart-list');
+        const badgeCont = document.getElementById('badge-container');
+        
+        if(!cart.length) { 
+            list.innerHTML = '<p style="text-align:center;color:#ccc;padding:20px;">หิวแหละดูออก... สั่งเลย!</p>'; 
+            document.getElementById('total-val').innerText = '0'; 
+            badgeCont.innerHTML = '';
+            return; 
+        }
+
+        badgeCont.innerHTML = `<span class="cart-badge">${cart.length}</span>`;
+        list.innerHTML = cart.map((it, i) => `
+            <div class="cart-item">
+                <div><b>${it.n}</b><br><small style="color:gray">${it.nt?'✨ '+it.nt:''}</small></div>
+                <div>฿${it.p} <button onclick="cart.splice(${i},1);updateCart();" style="color:red;border:none;background:none;cursor:pointer;">❌</button></div>
+            </div>`).join('');
+        
+        document.getElementById('total-val').innerText = cart.reduce((s, i) => s + i.p, 0).toLocaleString();
+    }
+
+    function closeSuccess() { document.getElementById('pop-success').style.display = 'none'; }
+
+    function showPayment() {
+        if(!cart.length) return alert("เลือกของก่อนนะวัยรุ่น!");
+        document.getElementById('qr-total').innerText = document.getElementById('total-val').innerText;
+        document.getElementById('pop-pay').style.display = 'flex';
+    }
+
+    function completeOrder() {
+        alert("ออเดอร์ส่งถึงครัวแล้วจ้า! นั่งรอเฟี้ยวๆ ได้เลย 🧡");
+        cart = []; updateCart();
+        document.getElementById('pop-pay').style.display = 'none';
+    }
+
+    initNav();
+    renderMenu('all');
+</script>
+</body>
+</html>
